@@ -25,13 +25,14 @@ public class PassengerService implements IPassengerService{
 
     @Override
     public Passenger getPassengerDetails(String passengerId){
-        return passengerRepository.findById(passengerId).get();
+        return passengerRepository.findById(passengerId)
+                .orElse(null);
 
     }
 
     @Override
     public Passenger registerPassenger(Passenger passenger) throws DuplicateEmailException {
-        try {
+
             if (isEmailUnique(passenger.getEmailId())) {
                 System.out.println("Saving Data");
                 System.out.println(passenger.toString());
@@ -39,9 +40,6 @@ public class PassengerService implements IPassengerService{
             } else {
                 throw new DuplicateEmailException("Email Registered ALready !! ");
             }
-        }catch(Exception ex) {
-            System.out.println(ex.getMessage());
-        }
         return passenger;
     }
 
@@ -56,16 +54,13 @@ public class PassengerService implements IPassengerService{
                 .filter(passenger -> hasCommonInterest(passenger.getIntrests(), passengerInterestsLookingForMatches))
                 .collect(Collectors.toList());
 
-        List<Passenger> finalMatches = new ArrayList<Passenger>();
-        for(int i=0; i< matchingPassengers.size();i++) {
-            Passenger pass = matchingPassengers.get(i);
-            if(!pass.getEmailId().equals(passengerLookingForMatches.getEmailId())) {
-                finalMatches.add(pass);
-            }
+        return matchingPassengers;
 
-        }
-        return finalMatches;
+    }
 
+    @Override
+    public void deleteById(String passengerId) {
+        passengerRepository.deleteById(passengerId);
     }
 
     private boolean isEmailUnique(String email) {

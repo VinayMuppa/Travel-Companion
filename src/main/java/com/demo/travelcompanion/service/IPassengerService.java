@@ -10,4 +10,6 @@ public interface IPassengerService {
     public Passenger getPassengerDetails(String passengerId);
     public Passenger registerPassenger(Passenger passenger) throws DuplicateEmailException;
     public List<Passenger> getPassengerMatchings(String passengerId);
+
+    public void deleteById(String passengerId);
 }

@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/travel")
@@ -33,7 +33,7 @@ public class TravelCampaignController {
     public ResponseEntity<Passenger> getPassengerDetails(@PathVariable String passengerId){
         Passenger passenger = passengerSerice.getPassengerDetails(passengerId);
         try {
-            if(passenger!=null)
+            if(passenger != null)
                 return new ResponseEntity<Passenger>(passenger,HttpStatus.OK);
             else
                 return new ResponseEntity<Passenger>(HttpStatus.NOT_FOUND);
@@ -43,14 +43,15 @@ public class TravelCampaignController {
     }
 
     @PostMapping("/register/passenger")
-    public ResponseEntity<Passenger> registerPassenger(@RequestBody Passenger passenger){
+    public ResponseEntity<?> registerPassenger(@RequestBody Passenger passenger){
 
         try {
             Passenger newPassenger = passengerSerice.registerPassenger(passenger);
-            emailService.sendEmail(passenger.getEmailId(),SUCCESS_RESGISTRATION_MESSAGE," Thanks for registering with Travel-Companion, Please go to app to find matchings for destinations");
+            emailService.sendEmail(passenger.getEmailId(),SUCCESS_RESGISTRATION_MESSAGE,"Thanks for registering with Travel-Companion. Please go to the app to find matches for destinations.");
             return new ResponseEntity<Passenger>(newPassenger, HttpStatus.OK);
         }catch(DuplicateEmailException ex) {
-            return new ResponseEntity<Passenger>(HttpStatus.BAD_REQUEST);
+            String errorMessage = "Email address " + passenger.getEmailId() + " is already registered.";
+            return ResponseEntity.badRequest().body(errorMessage);
         }
     }
 
@@ -63,6 +64,17 @@ public class TravelCampaignController {
             return new ResponseEntity<List<Passenger>>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @DeleteMapping("/passenger/{passengerId}")
+    public ResponseEntity<HttpStatus> deletePassenger(@PathVariable String passengerId){
+        if(passengerSerice.getPassengerDetails(passengerId)==null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else{
+            passengerSerice.deleteById(passengerId);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
 
 
